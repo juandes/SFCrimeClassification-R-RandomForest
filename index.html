@@ -1,0 +1,192 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>San Francisco Crime Classification - Kaggle Competition by juandes</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>San Francisco Crime Classification - Kaggle Competition</h1>
+        <p>My attempt at the Kaggle competition &quot;San Francisco Crime Classification&quot;</p>
+
+        <p class="view"><a href="https://github.com/juandes/SFCrimeClassification-KaggleCompetition">View the Project on GitHub <small>juandes/SFCrimeClassification-KaggleCompetition</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/juandes/SFCrimeClassification-KaggleCompetition/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/juandes/SFCrimeClassification-KaggleCompetition/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/juandes/SFCrimeClassification-KaggleCompetition">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="san-francisco-crime-classification---a-kaggle-competition" class="anchor" href="#san-francisco-crime-classification---a-kaggle-competition" aria-hidden="true"><span class="octicon octicon-link"></span></a>San Francisco Crime Classification - a Kaggle Competition</h1>
+
+<h2>
+<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview</h2>
+
+<hr>
+
+<p>The "San Francisco Crime Classification" challenge, is a <a href="http://kaggle.com/">Kaggle</a> competition 
+aimed to predict the category of the crimes that occurred in the city, given the time and location
+of the incident. </p>
+
+<p>In this post, I explain and outline my first solution to this challenge.</p>
+
+<p>Link to the competition: <a href="https://www.kaggle.com/c/sf-crime">San Francisco Crime Classification</a></p>
+
+<h3>
+<a id="learning-method" class="anchor" href="#learning-method" aria-hidden="true"><span class="octicon octicon-link"></span></a>Learning method</h3>
+
+<p>The algorithm chosen for the implemented solution, is a 
+<a href="https://en.wikipedia.org/wiki/Random_forest">random forest</a>, a 
+learning method used mostly for classification and regression.</p>
+
+<h2>
+<a id="data" class="anchor" href="#data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data</h2>
+
+<hr>
+
+<p>The competition provides two dataset: a train data set and a test dataset. The
+train dataset is made of 878049 observations and the test dataset, of 884262
+observations.</p>
+
+<p>Both of them contains incidents from January 1, 2003 to May 13, 2015.</p>
+
+<h3>
+<a id="data-fields" class="anchor" href="#data-fields" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data fields</h3>
+
+<ul>
+<li>Dates : timestamp of the crime incident.</li>
+<li>Category: Category of the incident. Also, this is the variable we want to predict.
+This variable is available only in the train dataset.</li>
+<li>Descript: A short description of the incident. This variable is available only 
+in the train dataset.</li>
+<li>DayOfWeek: Day of the week where the incident occurred.</li>
+<li>PdDistrict: Police Department District</li>
+<li>Resolution: Outcome of the incident. This variable is available only in the 
+train dataset.</li>
+<li>Address: Address of the incident.</li>
+<li>X: Longitude</li>
+<li>Y: Latitude</li>
+</ul>
+
+<h2>
+<a id="model-development" class="anchor" href="#model-development" aria-hidden="true"><span class="octicon octicon-link"></span></a>Model development</h2>
+
+<p>In an attempt to produce a lower error rate, three random forests were created, using
+using different predictors and number of trees. </p>
+
+<p>Here, they are presented in the same order they were created.</p>
+
+<h4>
+<a id="loading-data-and-library" class="anchor" href="#loading-data-and-library" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loading data and library</h4>
+
+<p>The first step is to load the random forest library, <a href="https://cran.r-project.org/web/packages/randomForest/randomForest.pdf"><em>randomForest</em></a>,
+followed by loading both the train and test datasets.</p>
+
+<p>To download the package, use this command:</p>
+
+<div class="highlight highlight-r"><pre>install.packages(<span class="pl-s"><span class="pl-pds">"</span>randomForest<span class="pl-pds">"</span></span>)</pre></div>
+
+<div class="highlight highlight-r"><pre>library(<span class="pl-smi">randomForest</span>)
+setwd(<span class="pl-s"><span class="pl-pds">"</span>~/path/to/working/directory<span class="pl-pds">"</span></span>)
+<span class="pl-smi">train</span> <span class="pl-k">&lt;-</span> read.csv(<span class="pl-s"><span class="pl-pds">"</span>~/path/to/working/directory/train.csv<span class="pl-pds">"</span></span>)
+<span class="pl-smi">test</span> <span class="pl-k">&lt;-</span> read.csv(<span class="pl-s"><span class="pl-pds">"</span>~/path/to/working/directory/test.csv<span class="pl-pds">"</span></span>)</pre></div>
+
+<h4>
+<a id="random-forest-model-1" class="anchor" href="#random-forest-model-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Random forest model #1</h4>
+
+<p>The first model uses the day of the week ('DayOfWeek') and the police district
+('PdDistrict') as the predictors. The forest is made of 25 trees.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-smi">rf</span> <span class="pl-k">&lt;-</span> randomForest(<span class="pl-smi">Category</span> <span class="pl-k">~</span> <span class="pl-smi">DayOfWeek</span> <span class="pl-k">+</span> <span class="pl-smi">PdDistrict</span>, <span class="pl-v">data</span> <span class="pl-k">=</span> <span class="pl-smi">train</span>, <span class="pl-v">ntree</span> <span class="pl-k">=</span> <span class="pl-c1">25</span>)</pre></div>
+
+<p>This model produced an average error rate of 77.95% (the error rate was calculated
+after several tests).</p>
+
+<h4>
+<a id="random-forest-model-2" class="anchor" href="#random-forest-model-2" aria-hidden="true"><span class="octicon octicon-link"></span></a>Random forest model #2</h4>
+
+<p>For the next model, a new column named 'Hour' was created. The value of this
+new field is the hour (in 24h format) of the incident (taken from the 'Dates' column).</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Make a new column containing the hour (24h format) of the crime</span>
+<span class="pl-smi">train</span><span class="pl-k">$</span><span class="pl-smi">Hour</span> <span class="pl-k">&lt;-</span> sapply(<span class="pl-smi">train</span><span class="pl-k">$</span><span class="pl-smi">Dates</span>, <span class="pl-k">function</span>(<span class="pl-smi">x</span>) as.integer(strftime(<span class="pl-smi">x</span>, <span class="pl-v">format</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>%H<span class="pl-pds">"</span></span>)))
+<span class="pl-c"># Another random forest model using the same predictors as before, plus the hour of</span>
+<span class="pl-c"># the crime</span>
+<span class="pl-smi">rf</span> <span class="pl-k">&lt;-</span> randomForest(<span class="pl-smi">Category</span> <span class="pl-k">~</span> <span class="pl-smi">DayOfWeek</span> <span class="pl-k">+</span> <span class="pl-smi">PdDistrict</span> <span class="pl-k">+</span> <span class="pl-smi">Hour</span>, <span class="pl-v">data</span> <span class="pl-k">=</span> <span class="pl-smi">train</span>, <span class="pl-v">ntree</span> <span class="pl-k">=</span> <span class="pl-c1">25</span>)</pre></div>
+
+<p>The average error rate is 77.53% (a small improvement from the previous one).</p>
+
+<h4>
+<a id="random-forest-model-3" class="anchor" href="#random-forest-model-3" aria-hidden="true"><span class="octicon octicon-link"></span></a>Random forest model #3</h4>
+
+<p>As in the last model, this one also introduces a new column, 'TimeOfDay'. This new
+variable has the time of the day (early morning, morning, afternoon and night) when
+the incident occurred.</p>
+
+<p>To create this new column, a custom function was created.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Function that returns the time of the day (early morning, morning, afternoon or</span>
+<span class="pl-c"># or night) according to the hour.</span>
+<span class="pl-en">timeoftheday</span> <span class="pl-k">&lt;-</span> <span class="pl-k">function</span>(<span class="pl-smi">hour</span>) {
+  <span class="pl-k">if</span> (<span class="pl-smi">hour</span> <span class="pl-k">&gt;</span><span class="pl-k">=</span> <span class="pl-c1">1</span> <span class="pl-k">&amp;&amp;</span> <span class="pl-smi">hour</span> <span class="pl-k">&lt;</span><span class="pl-k">=</span> <span class="pl-c1">6</span>) { <span class="pl-k">return</span> (as.factor(<span class="pl-s"><span class="pl-pds">"</span>early morning<span class="pl-pds">"</span></span>))}
+  <span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-smi">hour</span> <span class="pl-k">&gt;</span><span class="pl-k">=</span> <span class="pl-c1">7</span> <span class="pl-k">&amp;&amp;</span> <span class="pl-smi">hour</span> <span class="pl-k">&lt;</span><span class="pl-k">=</span> <span class="pl-c1">11</span>) { <span class="pl-k">return</span> (as.factor(<span class="pl-s"><span class="pl-pds">"</span>morning<span class="pl-pds">"</span></span>))}
+  <span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-smi">hour</span> <span class="pl-k">&gt;</span><span class="pl-k">=</span> <span class="pl-c1">12</span> <span class="pl-k">&amp;&amp;</span> <span class="pl-smi">hour</span> <span class="pl-k">&lt;</span><span class="pl-k">=</span> <span class="pl-c1">19</span>) { <span class="pl-k">return</span> (as.factor(<span class="pl-s"><span class="pl-pds">"</span>afternoon<span class="pl-pds">"</span></span>))}
+  <span class="pl-k">else</span> <span class="pl-k">return</span> (as.factor(<span class="pl-s"><span class="pl-pds">"</span>night<span class="pl-pds">"</span></span>))
+}</pre></div>
+
+<div class="highlight highlight-r"><pre><span class="pl-smi">train</span><span class="pl-k">$</span><span class="pl-smi">TimeOfDay</span> <span class="pl-k">&lt;-</span> sapply(<span class="pl-smi">train</span><span class="pl-k">$</span><span class="pl-smi">Hour</span>, <span class="pl-smi">timeoftheday</span>)
+<span class="pl-smi">rf</span> <span class="pl-k">&lt;-</span> randomForest(<span class="pl-smi">Category</span> <span class="pl-k">~</span> <span class="pl-smi">DayOfWeek</span> <span class="pl-k">+</span> <span class="pl-smi">PdDistrict</span> <span class="pl-k">+</span> <span class="pl-smi">TimeOfDay</span>, <span class="pl-v">data</span> <span class="pl-k">=</span> <span class="pl-smi">train</span>, <span class="pl-v">ntree</span> <span class="pl-k">=</span> <span class="pl-c1">25</span>) </pre></div>
+
+<p>Average error rate of 77.97% (worse than the previous one).</p>
+
+<p>After realizing how similar the error rates were, my next step was to try to minimize the error rate
+of the second model because it is the one with the lowest error rate. However, even with a larger number
+of trees, the error rate was very similar. Although in several cases the model achieved an error rate
+lower than 77.53%, the time it took to train the model, was significantly larger.</p>
+
+<h2>
+<a id="prediction-stage-and-preparation-of-the-output-file" class="anchor" href="#prediction-stage-and-preparation-of-the-output-file" aria-hidden="true"><span class="octicon octicon-link"></span></a>Prediction stage and preparation of the output file</h2>
+
+<p>Once the model is trained, the next step is to apply the model to the test dataset
+to predict the category of the crime.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Add the hour column to the test set.</span>
+<span class="pl-smi">test</span><span class="pl-k">$</span><span class="pl-smi">Hour</span> <span class="pl-k">&lt;-</span> sapply(<span class="pl-smi">test</span><span class="pl-k">$</span><span class="pl-smi">Dates</span>, <span class="pl-k">function</span>(<span class="pl-smi">x</span>) as.integer(strftime(<span class="pl-smi">x</span>, <span class="pl-v">format</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>%H<span class="pl-pds">"</span></span>)))
+<span class="pl-smi">predictions.result</span> <span class="pl-k">&lt;-</span> predict(<span class="pl-smi">rf</span>, <span class="pl-smi">test</span>)</pre></div>
+
+<p>The last step is preparing the output file.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-smi">results.for.submission</span> <span class="pl-k">&lt;-</span> table(<span class="pl-c1">1</span><span class="pl-k">:</span>length(<span class="pl-smi">predictions.result</span>), <span class="pl-smi">predictions.result</span>)
+rownames(<span class="pl-smi">results.for.submission</span>) <span class="pl-k">&lt;-</span> <span class="pl-c1">0</span><span class="pl-k">:</span><span class="pl-c1">884261</span>
+write.csv(<span class="pl-smi">results.for.submission</span>, <span class="pl-v">file</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>results.csv<span class="pl-pds">"</span></span>)</pre></div>
+
+<p>Upload it to Kaggle!</p>
+
+<h2>
+<a id="conclusion" class="anchor" href="#conclusion" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusion</h2>
+
+<p>As expected, the score I received from Kaggle was not that great (26.74064; #~350 in the leaderboard). 
+My plan for the next attempt is to play around with variables I left untouched this time and use 
+another classification model.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/juandes">juandes</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
