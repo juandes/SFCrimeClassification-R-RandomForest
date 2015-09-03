@@ -12,4 +12,4 @@ Link to the competition: [San Francisco Crime Classification](https://www.kaggle
 The algorithm chosen for the implemented solution, is a [random forest](https://en.wikipedia.org/wiki/Random_forest), a learning method used mostly for classification and regression.
 
 # Report
-A written report is available at: [San Francisco Crime Classification - a Kaggle Competition](http://juandes.github.io/SFCrimeClassification-KaggleCompetition/)
+A written report is available at: [San Francisco Crime Classification - a Kaggle Competition]http://juandes.github.io/SFCrimeClassification-R-RandomForest/
